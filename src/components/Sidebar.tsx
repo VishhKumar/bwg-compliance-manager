@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { UserButton, SignInButton, useAuth } from '@clerk/nextjs'
 import { 
   Building2, 
   Trash2, 
@@ -10,7 +11,8 @@ import {
   ShieldCheck, 
   AlertTriangle, 
   LayoutDashboard,
-  FileText
+  FileText,
+  LogIn
 } from 'lucide-react'
 
 const navItems = [
@@ -26,6 +28,7 @@ const navItems = [
 
 export default function Sidebar() {
   const pathname = usePathname()
+  const { isSignedIn, isLoaded } = useAuth()
 
   // Hide main navigation sidebar inside embedded Sanity Studio route
   if (pathname.startsWith('/studio')) return null
@@ -62,8 +65,33 @@ export default function Sidebar() {
         })}
       </nav>
 
-      <div className="pt-4 border-t border-slate-800 text-xs text-slate-500 px-2">
-        v1.0.0 — Next.js & Sanity
+      {/* Authentication & User Session Footer */}
+      <div className="pt-4 border-t border-slate-800 px-2 flex items-center justify-between">
+        <div className="text-xs text-slate-500">
+          v1.0.0 — SaaS Edition
+        </div>
+        <div>
+          {isLoaded && (
+            <>
+              {isSignedIn ? (
+                <UserButton 
+                  appearance={{
+                    elements: {
+                      avatarBox: "w-8 h-8 rounded-lg"
+                    }
+                  }}
+                />
+              ) : (
+                <SignInButton mode="modal">
+                  <button className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors">
+                    <LogIn className="w-3.5 h-3.5" />
+                    Sign In
+                  </button>
+                </SignInButton>
+              )}
+            </>
+          )}
+        </div>
       </div>
     </aside>
   )

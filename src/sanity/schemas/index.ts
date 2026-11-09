@@ -4,6 +4,7 @@ import vendor from './vendor'
 import handover from './handover'
 import complianceControl from './complianceControl'
 import issue from './issue'
+import { appUser } from './appUser'
 
 export const schemaTypes = [
   property,
@@ -12,4 +13,5 @@ export const schemaTypes = [
   handover,
   complianceControl,
   issue,
+  appUser
 ]

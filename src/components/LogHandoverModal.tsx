@@ -18,7 +18,7 @@ export default function LogHandoverModal({
   const [formData, setFormData] = useState({
     propertyId: '',
     vendorId: '',
-    handoverDate: '', // 2. Change this from new Date() to an empty string ''
+    handoverDate: '',
     wasteCategory: 'recyclable',
     quantityKg: '',
     receiptNumber: '',

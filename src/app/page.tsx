@@ -1,8 +1,37 @@
 import { getDashboardStats, getDailyWasteLogs, getIssues } from '@/sanity/lib/queries'
-import { Building2, Trash2, AlertTriangle, Truck, ArrowUpRight, Plus, ShieldCheck } from 'lucide-react'
+import { client } from '@/sanity/lib/client'
+import { Building2, Trash2, AlertTriangle, Truck, ArrowUpRight, Plus } from 'lucide-react'
 import Link from 'next/link'
+import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
+import { connection } from 'next/server'
 
 export default async function DashboardPage() {
+  // Signal to Next.js Cache Components that this request depends on a live connection
+  await connection()
+
+  // 1. Check for session cookie
+  const cookieStore = await cookies()
+  const userSession = cookieStore.get('app_user_session')?.value
+
+  if (!userSession) {
+    redirect('/sign-in')
+  }
+
+  // 2. Verify user in Sanity database with no-store cache strategy
+  const userQuery = `*[_type == "appUser" && email == $email && isActive == true][0]{ _id, allowedTabs }`
+  const authorizedUser = await client.fetch(
+    userQuery, 
+    { email: userSession }, 
+    { cache: 'no-store' }
+  )
+
+  // If email isn't in Sanity or access is revoked, force login
+  if (!authorizedUser) {
+    redirect('/sign-in')
+  }
+
+  // 3. Fetch Dashboard Data
   const stats = await getDashboardStats()
   const recentLogs = (await getDailyWasteLogs()).slice(0, 5)
   const activeIssues = (await getIssues()).filter((i: any) => i.status !== 'resolved').slice(0, 5)

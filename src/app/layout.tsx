@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import Sidebar from '@/components/Sidebar'
 import { Suspense } from 'react'
+import { ClerkProvider } from '@clerk/nextjs'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -17,16 +18,17 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body className={`${inter.className} flex min-h-screen bg-slate-50 text-slate-900`}>
-        
-        <Suspense fallback={null}>
-          <Sidebar />
-        </Suspense>
-        <main className="flex-1 p-8 overflow-y-auto">
-          {children}
-        </main>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        <body className={`${inter.className} flex min-h-screen bg-slate-50 text-slate-900`}>
+          <Suspense fallback={null}>
+            <Sidebar />
+          </Suspense>
+          <main className="flex-1 p-8 overflow-y-auto">
+            {children}
+          </main>
+        </body>
+      </html>
+    </ClerkProvider>
   )
 }
