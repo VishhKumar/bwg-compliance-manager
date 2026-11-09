@@ -1,51 +1,159 @@
+import { getDashboardStats, getDailyWasteLogs, getIssues } from '@/sanity/lib/queries'
+import { Building2, Trash2, AlertTriangle, Truck, ArrowUpRight, Plus, ShieldCheck } from 'lucide-react'
 import Link from 'next/link'
-import { Building2, Trash2, Truck, AlertTriangle } from 'lucide-react'
 
-export default function HomePage() {
+export default async function DashboardPage() {
+  const stats = await getDashboardStats()
+  const recentLogs = (await getDailyWasteLogs()).slice(0, 5)
+  const activeIssues = (await getIssues()).filter((i: any) => i.status !== 'resolved').slice(0, 5)
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Compliance & Operations Dashboard</h1>
-        <p className="text-sm text-slate-600 mt-1">
-          Overview of bulk waste generator logs, pickups, and statutory requirements.
-        </p>
+    <div className="space-y-8">
+      {/* Top Banner */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900">BWG Compliance Overview</h1>
+          <p className="text-slate-600 mt-1">
+            Real-time waste segregation monitoring, facility audits, and municipal compliance tracking.
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/studio"
+            target="_blank"
+            className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-colors shadow-sm"
+          >
+            <Plus className="w-4 h-4" />
+            Open Sanity Studio
+          </Link>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-5 bg-white border border-slate-200 rounded-xl shadow-sm">
+      {/* Metric Cards Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500 uppercase">Properties</span>
-            <Building2 className="w-5 h-5 text-emerald-600" />
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Registered Properties</span>
+            <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
+              <Building2 className="w-5 h-5" />
+            </div>
           </div>
-          <p className="text-2xl font-bold mt-2 text-slate-900">--</p>
-          <span className="text-xs text-slate-500">Registered Societies & Parks</span>
+          <div className="mt-4 flex items-baseline justify-between">
+            <span className="text-3xl font-bold text-slate-900">{stats.totalProperties}</span>
+            <Link href="/properties" className="text-xs font-medium text-emerald-600 hover:underline flex items-center">
+              View all <ArrowUpRight className="w-3 h-3 ml-0.5" />
+            </Link>
+          </div>
         </div>
 
-        <div className="p-5 bg-white border border-slate-200 rounded-xl shadow-sm">
+        <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500 uppercase">Today's Waste Log</span>
-            <Trash2 className="w-5 h-5 text-emerald-600" />
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Total Waste Tracked</span>
+            <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+              <Trash2 className="w-5 h-5" />
+            </div>
           </div>
-          <p className="text-2xl font-bold mt-2 text-slate-900">-- kg</p>
-          <span className="text-xs text-slate-500">Aggregated wet + dry waste</span>
+          <div className="mt-4 flex items-baseline justify-between">
+            <span className="text-3xl font-bold text-slate-900">{stats.totalWasteKg.toLocaleString()} <span className="text-sm font-normal text-slate-500">kg</span></span>
+            <Link href="/daily-waste" className="text-xs font-medium text-blue-600 hover:underline flex items-center">
+              Logs <ArrowUpRight className="w-3 h-3 ml-0.5" />
+            </Link>
+          </div>
         </div>
 
-        <div className="p-5 bg-white border border-slate-200 rounded-xl shadow-sm">
+        <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500 uppercase">Vendor Pickups</span>
-            <Truck className="w-5 h-5 text-emerald-600" />
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Open Infractions</span>
+            <div className="p-2 bg-amber-50 text-amber-600 rounded-lg">
+              <AlertTriangle className="w-5 h-5" />
+            </div>
           </div>
-          <p className="text-2xl font-bold mt-2 text-slate-900">--</p>
-          <span className="text-xs text-slate-500">Scheduled for today</span>
+          <div className="mt-4 flex items-baseline justify-between">
+            <span className="text-3xl font-bold text-slate-900">{stats.openIssues}</span>
+            <Link href="/issues" className="text-xs font-medium text-amber-600 hover:underline flex items-center">
+              Inspect <ArrowUpRight className="w-3 h-3 ml-0.5" />
+            </Link>
+          </div>
         </div>
 
-        <div className="p-5 bg-white border border-slate-200 rounded-xl shadow-sm">
+        <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500 uppercase">Open Issues</span>
-            <AlertTriangle className="w-5 h-5 text-amber-500" />
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Certified Vendors</span>
+            <div className="p-2 bg-purple-50 text-purple-600 rounded-lg">
+              <Truck className="w-5 h-5" />
+            </div>
           </div>
-          <p className="text-2xl font-bold mt-2 text-slate-900">--</p>
-          <span className="text-xs text-slate-500">Action items pending resolution</span>
+          <div className="mt-4 flex items-baseline justify-between">
+            <span className="text-3xl font-bold text-slate-900">{stats.activeVendors}</span>
+            <Link href="/vendors" className="text-xs font-medium text-purple-600 hover:underline flex items-center">
+              Directory <ArrowUpRight className="w-3 h-3 ml-0.5" />
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Two Column Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Recent Daily Logs Card */}
+        <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+          <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <Trash2 className="w-5 h-5 text-emerald-600" /> Recent Daily Waste Activity
+            </h2>
+            <Link href="/daily-waste" className="text-xs font-medium text-emerald-600 hover:underline">
+              View All
+            </Link>
+          </div>
+          <div className="divide-y divide-slate-100 text-sm">
+            {recentLogs.length === 0 ? (
+              <p className="py-6 text-center text-slate-500">No waste logs recorded yet.</p>
+            ) : (
+              recentLogs.map((log: any) => (
+                <div key={log._id} className="py-3.5 flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-slate-900">{log.propertyName || 'Unassigned Facility'}</p>
+                    <p className="text-xs text-slate-500">{log.date ? new Date(log.date).toLocaleDateString() : '—'}</p>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-xs font-semibold px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700">
+                      {(log.wetWasteKg || 0) + (log.dryWasteKg || 0)} kg wet+dry
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Active Inspection Issues Card */}
+        <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+          <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-amber-600" /> Pending Non-Compliance Issues
+            </h2>
+            <Link href="/issues" className="text-xs font-medium text-amber-600 hover:underline">
+              View All
+            </Link>
+          </div>
+          <div className="divide-y divide-slate-100 text-sm">
+            {activeIssues.length === 0 ? (
+              <p className="py-6 text-center text-slate-500">No pending issues! System fully compliant.</p>
+            ) : (
+              activeIssues.map((issue: any) => (
+                <div key={issue._id} className="py-3.5 flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-slate-900">{issue.title}</p>
+                    <p className="text-xs text-slate-500">{issue.propertyName || 'General'}</p>
+                  </div>
+                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full uppercase ${
+                    issue.severity === 'high' ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-700'
+                  }`}>
+                    {issue.severity || 'Medium'}
+                  </span>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       </div>
     </div>
