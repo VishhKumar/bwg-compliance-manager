@@ -1,27 +1,32 @@
-import { getHandovers } from '@/sanity/lib/queries'
-import { Truck, Plus } from 'lucide-react'
-import Link from 'next/link'
+import { getHandovers, getProperties, getVendors } from '@/sanity/lib/queries'
+import { Truck } from 'lucide-react'
+import ExportButton from '@/components/ExportButton'
+import LogHandoverModal from '@/components/LogHandoverModal'
 
 export default async function HandoversPage() {
   const handovers = await getHandovers()
+  const properties = await getProperties()
+  const vendors = await getVendors()
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">Waste Handovers</h1>
           <p className="text-sm text-slate-600 mt-1">
             Track certified waste handovers from properties to authorized recyclers and vendors.
           </p>
         </div>
-        <Link
-          href="/studio"
-          target="_blank"
-          className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          Log Handover in Studio
-        </Link>
+        <div className="flex items-center gap-3">
+          <ExportButton 
+            data={handovers}
+            filename="waste-handover-audit-report"
+            headers={['Handover Date', 'Property Name', 'Vendor Name', 'Waste Category', 'Quantity (Kg)', 'Receipt Number']}
+            keys={['handoverDate', 'propertyName', 'vendorName', 'wasteCategory', 'quantityKg', 'receiptNumber']}
+            label="Export CSV Report"
+          />
+          <LogHandoverModal properties={properties} vendors={vendors} />
+        </div>
       </div>
 
       <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
@@ -41,7 +46,7 @@ export default async function HandoversPage() {
               {handovers.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-8 text-center text-slate-500">
-                    No waste handovers recorded yet.
+                    No waste handovers recorded yet. Click &quot;Log Handover Pickup&quot; to record your first receipt.
                   </td>
                 </tr>
               ) : (
